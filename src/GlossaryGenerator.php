@@ -120,18 +120,19 @@ final class GlossaryGenerator
     {
         $result = chr(10) . '#### Properties' . chr(10) . chr(10);
         foreach ($schema->propertySchemas as $propertyName => $propertySchema) {
-            $result .= " * $propertyName (" . self::linkType($propertySchema) . ")";
+            $result .= "* $propertyName (" . self::linkType($propertySchema) . ")";
             if ($propertySchema instanceof OptionalSchema) {
                 $result .= ' (optional)';
             }
             $overriddenDescription = $schema->overriddenPropertyDescription($propertyName);
             if ($overriddenDescription !== null) {
-                $result .= ' – ' . $overriddenDescription;
+                $result .= ' – _' . $overriddenDescription . '_';
             }
             $result .= "\n";
         }
         return $result;
     }
+
     private function stringDetails(StringSchema $schema): string
     {
         $result = '';
@@ -149,7 +150,6 @@ final class GlossaryGenerator
         }
         return $result;
     }
-
 
     private static function linkType(Schema $schema): string
     {
