@@ -6,6 +6,7 @@ namespace Wwwision\TypesGLossary\Tests\PHPUnit;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Wwwision\Types\Attributes\Description;
+use Wwwision\Types\Attributes\FloatBased;
 use Wwwision\Types\Attributes\IntegerBased;
 use Wwwision\Types\Attributes\ListBased;
 use Wwwision\Types\Attributes\StringBased;
@@ -20,7 +21,7 @@ final class GlossaryGeneratorTest extends TestCase
     {
         $generator = new GlossaryGenerator();
         $generator->registerClassNames('Group 01', SomeNumber::class, SomeNumbers::class, Date::class, SomeShape::class);
-        $generator->registerClassNames('Group 02', SomeOtherShape::class, Title::class, Severity::class);
+        $generator->registerClassNames('Group 02', SomeOtherShape::class, Title::class, Severity::class, GeoCoordinates::class, Longitude::class, Latitude::class);
 
         $expectedGlossary = <<<GLOSSARY
             # Group 01
@@ -69,7 +70,7 @@ final class GlossaryGeneratorTest extends TestCase
              * number ([Some Number](#some-number))
              * numbers ([Some Numbers](#some-numbers))
              * boolean ([boolean](#boolean)) (optional)
-             * int ([int](#int)) (optional) – Overridden description
+             * int ([int](#int)) (optional) – _Overridden description_
              * string ([string](#string)) (optional)
              * date ([Date](#date)) (optional)
              * nestedShape ([Some Other Shape](#some-other-shape)) (optional)
@@ -105,6 +106,33 @@ final class GlossaryGeneratorTest extends TestCase
                 * LOW
                 * MEDIUM
                 * HIGH _– Highest severity_
+
+            ## Geo Coordinates
+            
+            ### Schema
+            
+             * **type**: object
+            
+            #### Properties
+            
+             * longitude ([Longitude](#longitude))
+             * latitude ([Latitude](#latitude))
+            
+            ## Longitude
+            
+            ### Schema
+            
+             * **type**: float
+             * **minimum**: -180
+             * **maximum**: 180.5
+            
+            ## Latitude
+            
+            ### Schema
+            
+             * **type**: float
+             * **minimum**: -90
+             * **maximum**: 90
 
 
             GLOSSARY;
@@ -163,4 +191,25 @@ enum Severity: int {
     case MEDIUM = 1;
     #[Description('Highest severity')]
     case HIGH = 3;
+}
+
+#[FloatBased(minimum: -180.0, maximum: 180.5)]
+final class Longitude {
+    private function __construct(
+        public readonly float $value,
+    ) {}
+}
+
+#[FloatBased(minimum: -90, maximum: 90)]
+final class Latitude {
+    private function __construct(
+        public readonly float $value,
+    ) {}
+}
+
+final class GeoCoordinates {
+    public function __construct(
+        public readonly Longitude $longitude,
+        public readonly Latitude $latitude
+    ) {}
 }
