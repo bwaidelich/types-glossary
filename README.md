@@ -44,7 +44,8 @@ $generator = new GlossaryGenerator();
 $generator->registerClassNames('Group 01', Name::class, Age::class);
 $generator->registerClassNames('Group 02', Contact::class, Contacts::class);
 
-assert($generator->generate() === '# Group 01
+$expected = <<<MARKDOWN
+# Group 01
 
 ## Name
 
@@ -84,7 +85,10 @@ assert($generator->generate() === '# Group 01
  * **minItems**: 1
  * **maxItems**: 5
 
-');
+
+MARKDOWN;
+
+assert($generator->generate() === $expected);
 ```
 
 See [GlossaryGeneratorTest.php](tests%2FPHPUnit%2FGlossaryGeneratorTest.php) for more examples
