@@ -8,9 +8,11 @@ use InvalidArgumentException;
 use Webmozart\Assert\Assert;
 use Wwwision\Types\Parser;
 use Wwwision\Types\Schema\EnumSchema;
+use Wwwision\Types\Schema\FloatSchema;
 use Wwwision\Types\Schema\IntegerSchema;
 use Wwwision\Types\Schema\ListSchema;
 use Wwwision\Types\Schema\LiteralBooleanSchema;
+use Wwwision\Types\Schema\LiteralFloatSchema;
 use Wwwision\Types\Schema\LiteralIntegerSchema;
 use Wwwision\Types\Schema\LiteralStringSchema;
 use Wwwision\Types\Schema\OptionalSchema;
@@ -59,6 +61,7 @@ final class GlossaryGenerator
             LiteralBooleanSchema::class => 'boolean',
             LiteralStringSchema::class, StringSchema::class => 'string',
             LiteralIntegerSchema::class, IntegerSchema::class => 'integer',
+            LiteralFloatSchema::class, FloatSchema::class => 'float',
             EnumSchema::class => $schema->getBackingType() === 'int' ? 'integer' : $schema->getBackingType(),
             ListSchema::class => 'array',
             ShapeSchema::class => 'object',
@@ -66,13 +69,14 @@ final class GlossaryGenerator
         };
         $result = " * **type**: $type\n";
         $result .= match ($schema::class) {
-            LiteralBooleanSchema::class, LiteralStringSchema::class, LiteralIntegerSchema::class => '',
+            LiteralBooleanSchema::class, LiteralStringSchema::class, LiteralIntegerSchema::class, LiteralFloatSchema::class => '',
             EnumSchema::class => $this->enumDetails($schema),
             IntegerSchema::class => $this->intDetails($schema),
+            FloatSchema::class => $this->floatDetails($schema),
             ListSchema::class => $this->listDetails($schema),
             ShapeSchema::class => $this->shapeDetails($schema),
             StringSchema::class => $this->stringDetails($schema),
-            default => throw new InvalidArgumentException(sprintf('Unsupported schema type "%s"', get_debug_type($schema))),
+            default => throw new InvalidArgumentException(sprintf('Unsupported schema type "%s" for details', get_debug_type($schema))),
         };
         $result .= chr(10);
         return $result;
@@ -104,6 +108,18 @@ final class GlossaryGenerator
         return $result;
     }
 
+    private function floatDetails(FloatSchema $schema): string
+    {
+        $result = '';
+        if ($schema->minimum !== null) {
+            $result .= " * **minimum**: $schema->minimum\n";
+        }
+        if ($schema->maximum !== null) {
+            $result .= " * **maximum**: $schema->maximum\n";
+        }
+        return $result;
+    }
+
     private function listDetails(ListSchema $schema): string
     {
         $result = " * **items.type**: " . self::linkType($schema->itemSchema) . "\n";
@@ -120,7 +136,7 @@ final class GlossaryGenerator
     {
         $result = chr(10) . '#### Properties' . chr(10) . chr(10);
         foreach ($schema->propertySchemas as $propertyName => $propertySchema) {
-            $result .= "* $propertyName (" . self::linkType($propertySchema) . ")";
+            $result .= " * $propertyName (" . self::linkType($propertySchema) . ")";
             if ($propertySchema instanceof OptionalSchema) {
                 $result .= ' (optional)';
             }
