@@ -89,7 +89,7 @@ final class GlossaryGenerator
             $result .= "    * " . $caseSchema->getName();
             $caseDescription = $caseSchema->getDescription();
             if ($caseDescription !== null) {
-                $result .= " _– ${caseDescription}_";
+                $result .= " _– {$caseDescription}_";
             }
             $result .= "\n";
         }
